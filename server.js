@@ -43,15 +43,8 @@ if (require.main === module && process.env.NODE_ENV !== 'production') {
   start();
 }
 
-// Make sure to initialize Fastify
-const initFastify = async () => {
-  await fastify.ready();
-  return fastify;
-};
-
 // For Vercel serverless environment
 module.exports = async (req, res) => {
-  // Set a timeout for the entire request handler
   const timeout = setTimeout(() => {
     console.error('Function execution timeout is about to occur');
     if (!res.headersSent) {
@@ -65,9 +58,12 @@ module.exports = async (req, res) => {
   }, 50000); // Set to 50 seconds (10s less than the Vercel limit)
 
   try {
-    await initFastify();
+    // Important: Don't listen to the server in serverless environment
+    // Just await all plugins to be ready
+    await fastify.ready();
 
-    // Use Fastify's callback API instead of the server.emit approach
+    // Use Fastify's server directly without trying to call server.listen()
+    // This is the recommended approach for serverless environments
     fastify.server.emit('request', req, res);
   } catch (error) {
     console.error('Serverless handler error:', error);

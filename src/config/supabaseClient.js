@@ -9,6 +9,15 @@ if (!supabaseUrl || !supabaseServiceRoleKey) {
   throw new Error('Supabase URL and Service Key must be defined in environment variables');
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+// Create client with optimized options for serverless
+const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+  auth: {
+    persistSession: false
+  },
+  // Set a reasonable timeout for the entire request
+  db: {
+    schema: 'public'
+  }
+});
 
 module.exports = supabase;

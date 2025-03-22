@@ -43,11 +43,37 @@ if (require.main === module && process.env.NODE_ENV !== 'production') {
   start();
 }
 
+// Initialize Fastify for serverless (only once per instance)
+let fastifyInitialized = false;
+
+const initFastify = async () => {
+  if (!fastifyInitialized) {
+    try {
+      await fastify.ready();
+      fastifyInitialized = true;
+    } catch (err) {
+      console.error('Error initializing Fastify:', err);
+      throw err;
+    }
+  }
+  return fastify;
+};
+
 // For Vercel serverless environment
-// This creates a handler that doesn't try to start a server
 const serverlessHandler = async (req, res) => {
-  await fastify.ready();
-  fastify.server.emit('request', req, res);
+  try {
+    const server = await initFastify();
+    server.server.emit('request', req, res);
+  } catch (error) {
+    console.error('Serverless handler error:', error);
+
+    // Send a response if one hasn't been sent yet
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
+  }
 };
 
 // Export handler for serverless use

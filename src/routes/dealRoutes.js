@@ -1,7 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const dealController = require('../controllers/dealController');
+// fix it to dealRoutes
+const dealController  = require('../controllers/dealController');
 
-router.get('/', dealController.getAllDeals);
-
-module.exports = router;
+// Export as a Fastify plugin
+module.exports = async function (fastify, opts) {
+  // GET all restaurants
+  fastify.get('/', dealController.getAllDeals);
+  fastify.get('/:id', dealController.getDealById);
+};

@@ -33,8 +33,6 @@ class RestaurantService {
         return [];
       }
 
-      console.log(`Successfully fetched ${data.length} restaurants`);
-
       // Ensure data is mapped correctly
       return data.map(restaurant => new Restaurant(restaurant));
     } catch (error) {

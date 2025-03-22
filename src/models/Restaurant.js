@@ -4,10 +4,10 @@ class Restaurant {
     this.id = data.id || null
     this.created_at = data.created_at || new Date().toISOString();
     this.name = data.name || null;
-    this.logo_url = data.logo_url || null;
+    this.logo_url = "data.logo_url" || null;
     this.website_url = data.website_url || null;
-    this.reviews_count = data.reviews_count || 0;
-    this.average_rating = data.average_rating || 0.0;
+    this.reviews_count = data.reviews_count|| 0;
+    this.average_rating = Math.round(data.average_rating) / 2 || 0.0;
     this.address = data.address || null;
     this.maps_url = data.maps_url || null;
   }

@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3001;
 
 // Register CORS
 fastify.register(require('@fastify/cors'), {
-  origin: ['http://localhost:3000', 'https://https://pronto-client.vercel.app']
+  origin: ['http://localhost:3000', 'https://pronto-client.vercel.app']
 });
 
 // Parse JSON bodies

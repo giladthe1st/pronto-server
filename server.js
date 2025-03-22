@@ -43,27 +43,19 @@ if (require.main === module && process.env.NODE_ENV !== 'production') {
   start();
 }
 
-// Initialize Fastify for serverless (only once per instance)
-let fastifyInitialized = false;
-
+// Make sure to initialize Fastify
 const initFastify = async () => {
-  if (!fastifyInitialized) {
-    try {
-      await fastify.ready();
-      fastifyInitialized = true;
-    } catch (err) {
-      console.error('Error initializing Fastify:', err);
-      throw err;
-    }
-  }
+  await fastify.ready();
   return fastify;
 };
 
 // For Vercel serverless environment
-const serverlessHandler = async (req, res) => {
+module.exports = async (req, res) => {
   try {
-    const server = await initFastify();
-    server.server.emit('request', req, res);
+    await initFastify();
+
+    // Use Fastify's callback API instead of the server.emit approach
+    fastify.server.emit('request', req, res);
   } catch (error) {
     console.error('Serverless handler error:', error);
 
@@ -75,6 +67,3 @@ const serverlessHandler = async (req, res) => {
     }
   }
 };
-
-// Export handler for serverless use
-module.exports = serverlessHandler;

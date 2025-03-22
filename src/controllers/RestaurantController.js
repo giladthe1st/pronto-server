@@ -1,12 +1,12 @@
 const RestaurantService = require('../services/restaurantService');
 
 const restaurantController = {
-  getAllRestaurants: async (req, res) => {
+  getAllRestaurants: async (request, reply) => {
     try {
       const restaurants = await RestaurantService.getAllRestaurants();
-      res.json(restaurants);
+      return restaurants; // Fastify automatically serializes the response
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      reply.code(500).send({ error: error.message });
     }
   }
 };

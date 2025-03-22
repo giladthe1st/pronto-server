@@ -1,7 +1,7 @@
-const express = require('express');
-const router = express.Router();
 const restaurantController = require('../controllers/RestaurantController');
 
-router.get('/', restaurantController.getAllRestaurants);
-
-module.exports = router;
+// Export as a Fastify plugin
+module.exports = async function (fastify, opts) {
+  // GET all restaurants
+  fastify.get('/', restaurantController.getAllRestaurants);
+};

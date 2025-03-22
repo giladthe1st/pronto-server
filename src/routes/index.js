@@ -1,10 +1,9 @@
-const express = require('express');
-const router = express.Router();
-
 const restaurantRoutes = require('./restaurantRoutes');
 
-// Combine all routes
-router.use('/restaurants', restaurantRoutes);
-// Add other routes
+// Register all routes as a Fastify plugin
+module.exports = async function (fastify, opts) {
+  // Register restaurant routes with '/restaurants' prefix
+  fastify.register(restaurantRoutes, { prefix: '/restaurants' });
 
-module.exports = router;
+  // Add other routes here
+};

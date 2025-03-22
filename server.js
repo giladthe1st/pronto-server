@@ -1,18 +1,47 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
+const fastify = require('fastify')({
+  logger: true
+});
 const routes = require('./src/routes');
-const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors({ origin: 'http://localhost:3000' }));
-app.use(express.json());
+// Register CORS
+fastify.register(require('@fastify/cors'), {
+  origin: ['http://localhost:3000', 'https://https://pronto-client.vercel.app']
+});
 
-// Use the combined routes with '/api' prefix
-app.use('/api', routes); // This is the key fix
+// Parse JSON bodies
+fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
+  try {
+    const json = JSON.parse(body);
+    done(null, json);
+  } catch (err) {
+    err.statusCode = 400;
+    done(err, undefined);
+  }
+});
+
+// Register routes
+fastify.register(routes, { prefix: '/api' });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`Express server running on http://localhost:${PORT}`);
-});
+const start = async () => {
+  try {
+    await fastify.listen({
+      port: PORT,
+      host: '0.0.0.0'
+    });
+    console.log(`Fastify server running on port: ${PORT}`);
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+}
+
+// Check if this is being run directly or imported as a module
+if (require.main === module) {
+  start();
+}
+
+// Export for serverless use
+module.exports = fastify;

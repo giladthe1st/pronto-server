@@ -51,6 +51,19 @@ const initFastify = async () => {
 
 // For Vercel serverless environment
 module.exports = async (req, res) => {
+  // Set a timeout for the entire request handler
+  const timeout = setTimeout(() => {
+    console.error('Function execution timeout is about to occur');
+    if (!res.headersSent) {
+      res.statusCode = 504;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+        error: 'Gateway Timeout',
+        message: 'The request took too long to process. Please try again later.'
+      }));
+    }
+  }, 50000); // Set to 50 seconds (10s less than the Vercel limit)
+
   try {
     await initFastify();
 
@@ -63,7 +76,13 @@ module.exports = async (req, res) => {
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ error: 'Internal Server Error' }));
+      res.end(JSON.stringify({
+        error: 'Internal Server Error',
+        message: error.message || 'An unexpected error occurred'
+      }));
     }
+  } finally {
+    // Clear the timeout when the request is complete
+    clearTimeout(timeout);
   }
 };

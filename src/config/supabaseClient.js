@@ -15,8 +15,23 @@ const supabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
     persistSession: false
   },
   // Set a reasonable timeout for the entire request
+  global: {
+    fetch: (url, options) => {
+      return fetch(url, {
+        ...options,
+        // Set a 10-second timeout to prevent hanging connections
+        signal: AbortSignal.timeout(10000) // 10 seconds timeout
+      });
+    }
+  },
   db: {
     schema: 'public'
+  },
+  // Add retry options to help with intermittent failures
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 

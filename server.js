@@ -44,7 +44,7 @@ if (require.main === module && process.env.NODE_ENV !== 'production') {
 }
 
 // For Vercel serverless environment
-module.exports = async (req, res) => {
+const serverlessHandler = async (req, res) => {
   const timeout = setTimeout(() => {
     console.error('Function execution timeout is about to occur');
     if (!res.headersSent) {
@@ -82,3 +82,6 @@ module.exports = async (req, res) => {
     clearTimeout(timeout);
   }
 };
+
+// Export the serverless handler
+module.exports = serverlessHandler;

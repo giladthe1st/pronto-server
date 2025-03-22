@@ -24,7 +24,7 @@ fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function
 // Register routes
 fastify.register(routes, { prefix: '/api' });
 
-// Start server
+// For traditional NodeJS environment
 const start = async () => {
   try {
     await fastify.listen({
@@ -38,10 +38,17 @@ const start = async () => {
   }
 }
 
-// Check if this is being run directly or imported as a module
-if (require.main === module) {
+// Only start the server when running directly (not in serverless)
+if (require.main === module && process.env.NODE_ENV !== 'production') {
   start();
 }
 
-// Export for serverless use
-module.exports = fastify;
+// For Vercel serverless environment
+// This creates a handler that doesn't try to start a server
+const serverlessHandler = async (req, res) => {
+  await fastify.ready();
+  fastify.server.emit('request', req, res);
+};
+
+// Export handler for serverless use
+module.exports = serverlessHandler;

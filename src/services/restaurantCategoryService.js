@@ -45,11 +45,12 @@ class RestaurantCategoryService {
     }
   }
 
-  static async getRestaurantCategoryById(id) {
+  static async getRestaurantCategoryByRestaurantId(restaurantId, id) {
     const { data, error } = await supabase
       .from('Restaurant_Categories')
       .select('*')
       .eq('id', id)
+      .eq('restaurant_id', restaurantId)
       .single();
 
     if (error) {

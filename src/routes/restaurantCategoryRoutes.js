@@ -4,5 +4,5 @@ const restaurantCategoryController = require('../controllers/RestaurantCategoryC
 module.exports = async function (fastify, opts) {
   // GET all restaurant categories
   fastify.get('/', restaurantCategoryController.getAllRestaurantCategories);
-  fastify.get('/:id', restaurantCategoryController.getRestaurantCategoryById);
+  fastify.get('/:id', restaurantCategoryController.getRestaurantCategoryByRestaurantId);
 };

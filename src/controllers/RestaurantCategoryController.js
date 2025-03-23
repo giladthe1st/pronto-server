@@ -27,11 +27,11 @@ const restaurantCategoryController = {
       });
     }
   },
-  getRestaurantCategoryById: async (request, reply) => {
+  getRestaurantCategoryByRestaurantId: async (request, reply) => {
     const { id } = request.params;
 
     try {
-      return await RestaurantCategoryService.getRestaurantCategoryById(id);
+      return await RestaurantCategoryService.getRestaurantCategoryByRestaurantId(id);
     } catch (error) {
       reply.code(error.message.includes('timeout') ? 504 : 500).send({
         error: error.message.includes('timeout') ? 'Gateway Timeout' : 'Internal Server Error',

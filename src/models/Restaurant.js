@@ -10,14 +10,14 @@ class Restaurant {
     this.average_rating = Math.round(data.average_rating) / 2 || 0.0;
     this.address = data.address || null;
     this.maps_url = data.maps_url || null;
+    this.latitude = data.latitude || null;
+    this.longitude = data.longitude || null;
   }
 
-  // Optional: Add validation methods
   isValid() {
     return this.name && this.address;
   }
 
-  // Optional: Add transformation methods
   toJSON() {
     return {
       id: this.id,
@@ -27,10 +27,11 @@ class Restaurant {
       reviews_count: this.reviews_count,
       average_rating: this.average_rating,
       address: this.address,
-      maps_url: this.maps_url
+      maps_url: this.maps_url,
+      latitude: this.latitude,
+      longitude: this.longitude
     };
   }
 }
 
-// Ensure the class is exported
 module.exports = Restaurant;

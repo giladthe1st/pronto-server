@@ -13,8 +13,6 @@ class DealService {
     }
 
     try {
-      console.log(`Service: Fetching deals from Supabase for restaurant_id: ${parsedRestaurantId}`);
-
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Database query timeout')), 8000); // 8 seconds DB timeout
       });
@@ -65,6 +63,115 @@ class DealService {
       throw error;
     }
   }
+
+    static async listAllDeals(options = {}) {
+      // TODO: Add pagination (options.page, options.limit), filtering (options.restaurantId)
+      try {
+          console.log(`Service: Fetching all deals from Supabase`);
+          const { data, error } = await supabase
+              .from('Deals')
+              .select('*')
+              // .eq('restaurant_id', options.restaurantId) // Example filter
+              // .range(start, end) // Example pagination
+              .order('created_at', { ascending: false }); // Example order
+
+            if (error) throw error;
+            return data ? data.map(dealData => new Deal(dealData)) : [];
+      } catch (error) {
+          console.error(`Service: Error listing all deals:`, error.message);
+          throw error;
+      }
+  }
+
+  static async createDeal(dealData) {
+      const deal = new Deal(dealData);
+      // TODO: Add validation (e.g., check if restaurant_id exists in Restaurants table)
+        if (!deal.isValid()) { // Use your model's validation
+            throw new Error("Validation failed: Deal data is incomplete.");
+        }
+      try {
+            const { data, error } = await supabase
+              .from('Deals')
+              .insert(deal.toJSON ? deal.toJSON() : deal)
+              .select()
+              .single();
+
+            if (error) throw error;
+            return data ? new Deal(data) : null;
+      } catch (error) {
+            console.error('Service error creating deal:', error);
+            if (error.code === '23503') { // Foreign key violation
+                throw new Error(`Cannot create deal: Restaurant with ID ${deal.restaurant_id} does not exist.`);
+            }
+            throw new Error(`Database error creating deal: ${error.message}`);
+      }
+  }
+
+    static async findDealById(id) {
+      try {
+            const { data, error } = await supabase
+              .from('Deals')
+              .select('*')
+              .eq('id', id)
+              .maybeSingle();
+
+            if (error) throw error;
+            return data ? new Deal(data) : null;
+      } catch (error) {
+            console.error(`Service error finding deal ${id}:`, error);
+            throw new Error(`Database error finding deal: ${error.message}`);
+      }
+  }
+
+    static async updateDeal(id, updateData) {
+        // TODO: Validation
+        delete updateData.id;
+        delete updateData.created_at;
+        if (Object.keys(updateData).length === 0) {
+            throw new Error("No valid fields provided for update.");
+        }
+      try {
+            const { data, error, count } = await supabase
+              .from('Deals')
+              .update(updateData)
+              .eq('id', id)
+              .select()
+              .single();
+
+            if (error) throw error;
+            if (!data) {
+              console.warn(`Service: No deal found with id ${id} to update.`);
+              return null;
+          }
+          return new Deal(data);
+      } catch (error) {
+            console.error(`Service error updating deal ${id}:`, error);
+            if (error.code === '23503') { // Foreign key violation
+                throw new Error(`Cannot update deal: Restaurant with ID ${updateData.restaurant_id} does not exist.`);
+            }
+            throw new Error(`Database error updating deal: ${error.message}`);
+      }
+  }
+
+    static async deleteDeal(id) {
+      try {
+          const { error, count } = await supabase
+              .from('Deals')
+              .delete()
+              .eq('id', id);
+
+            if (error) throw error;
+            const success = count > 0;
+            if(!success) {
+                console.warn(`Service: No deal found with id ${id} to delete.`);
+            }
+            return success;
+      } catch (error) {
+          console.error(`Service error deleting deal ${id}:`, error);
+          throw new Error(`Database error deleting deal: ${error.message}`);
+      }
+  }
+
 }
 
 module.exports = DealService;

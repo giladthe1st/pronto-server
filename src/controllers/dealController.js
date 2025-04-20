@@ -6,7 +6,6 @@ const dealController = {
   getDealsByRestaurantId: async (request, reply) => {
     // Extract restaurantId from the URL parameters
     const { restaurantId } = request.params;
-    console.log(`Deal controller: getDealsByRestaurantId request received for restaurant ID: ${restaurantId}`);
 
     // Basic validation
     if (!restaurantId) {
@@ -25,7 +24,6 @@ const dealController = {
         timeoutPromise
       ]);
 
-      console.log(`Deal controller: returning ${deals.length} deals for restaurant ID: ${restaurantId}`);
       // If no deals are found, it will return an empty array, which is valid JSON
       return deals; // Fastify automatically serializes the response
     } catch (error) {
@@ -50,31 +48,6 @@ const dealController = {
       });
     }
   },
-
-  // Removed getDealById - If you need to get a specific deal BY ITS ID
-  // within the context of a restaurant, you'd add a new function like
-  // getSpecificDealForRestaurant(request, reply) here and a corresponding route
-  // like /restaurants/:restaurantId/deals/:dealId
-
-  // Example placeholder for a featured deal function
-  /*
-  getFeaturedDealForRestaurant: async (request, reply) => {
-      const { restaurantId } = request.params;
-      console.log(`Deal controller: getFeaturedDealForRestaurant request received for restaurant ID: ${restaurantId}`);
-      // Needs implementation in DealService (e.g., DealService.getFeaturedDeal(restaurantId))
-      // Add timeout and error handling similar to getDealsByRestaurantId
-      try {
-          // const featuredDeal = await DealService.getFeaturedDeal(restaurantId);
-          // if (!featuredDeal) {
-          //     return reply.code(404).send({ message: 'No featured deal found for this restaurant.' });
-          // }
-          // return featuredDeal;
-          reply.code(501).send({ message: 'Featured deal endpoint not implemented yet.'});
-      } catch (error) {
-          // Handle errors
-      }
-  }
-  */
 };
 
 module.exports = dealController;

@@ -138,11 +138,37 @@ const adminController = {
   },
 
   createRestaurant: async (request, reply) => {
+    // Log when a create restaurant request is received
+    console.log('Received request to create a new restaurant:', {
+      from: request.ip || request.headers['x-forwarded-for'] || 'unknown',
+      body: request.body
+    });
     try {
       const newRestaurantData = request.body;
       // TODO: Add validation using a schema library (like Zod) or manually
       const createdRestaurant = await RestaurantService.createRestaurant(newRestaurantData);
-      return reply.code(201).send(createdRestaurant);
+      // Handle categories if provided
+      let categories = [];
+      const supabase = require('../config/supabaseClient');
+      if (Array.isArray(newRestaurantData.categories) && createdRestaurant.id) {
+        // Insert categories into join table
+        for (const categoryName of newRestaurantData.categories) {
+          // Optionally, check if this (restaurant_id, category_name) already exists to avoid duplicates
+          await supabase.from('Restaurant_Categories').insert([
+            { restaurant_id: createdRestaurant.id, category_name: categoryName }
+          ], { upsert: true });
+        }
+        // Fetch categories to return in response
+        const { data: categoriesData, error: categoriesError } = await supabase
+          .from('Restaurant_Categories')
+          .select('category_name')
+          .eq('restaurant_id', createdRestaurant.id);
+        if (!categoriesError && Array.isArray(categoriesData)) {
+          categories = categoriesData.map(c => c.category_name);
+        }
+      }
+      const response = { ...createdRestaurant.toJSON ? createdRestaurant.toJSON() : createdRestaurant, categories };
+      return reply.code(201).send(response);
     } catch (error) {
        console.error('Admin controller error creating restaurant:', error.message);
        // Handle specific errors like unique constraints if needed

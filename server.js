@@ -28,12 +28,18 @@ fastify.register(require('@fastify/multipart'), {
 // Keep your custom JSON parser if you specifically need it,
 // otherwise Fastify's default might suffice.
 fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
-  try {
-    const json = JSON.parse(body);
-    done(null, json);
-  } catch (err) {
-    err.statusCode = 400;
-    done(err, undefined);
+  // Only parse body for methods that expect a body
+  if (["POST", "PUT", "PATCH"].includes(req.method)) {
+    try {
+      const json = JSON.parse(body);
+      done(null, json);
+    } catch (err) {
+      err.statusCode = 400;
+      done(err, undefined);
+    }
+  } else {
+    // For DELETE, GET, etc. just return undefined (no body expected)
+    done(null, undefined);
   }
 });
 

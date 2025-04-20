@@ -2,12 +2,8 @@ const RestaurantCategoryService = require('../services/restaurantCategoryService
 
 const restaurantCategoryController = {
   getAllRestaurantCategories: async (request, reply) => {
-    console.log('Restaurant category controller: getAllRestaurantCategories request received');
-
     try {
       const restaurantCategories = await RestaurantCategoryService.getAllRestaurantCategories();
-
-      console.log(`Restaurant category controller: returning ${restaurantCategories.length} restaurant categories`);
       return restaurantCategories; // Fastify automatically serializes the response
     } catch (error) {
       console.error('Restaurant category controller error:', error.message);

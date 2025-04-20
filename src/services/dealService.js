@@ -13,8 +13,6 @@ class DealService {
     }
 
     try {
-      console.log(`Service: Fetching deals from Supabase for restaurant_id: ${parsedRestaurantId}`);
-
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Database query timeout')), 8000); // 8 seconds DB timeout
       });

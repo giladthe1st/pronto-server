@@ -60,6 +60,39 @@ class RestaurantCategoryService {
 
     return new RestaurantCategory(data);
   }
+
+  /**
+   * Replace all categories for a restaurant (delete old, insert new)
+   * @param {number} restaurantId
+   * @param {string[]} categories
+   */
+  static async replaceCategoriesForRestaurant(restaurantId, categories) {
+    const supabase = require('../config/supabaseClient');
+    // Remove all existing categories
+    const { error: deleteError } = await supabase
+      .from('Restaurant_Categories')
+      .delete()
+      .eq('restaurant_id', restaurantId);
+    if (deleteError) {
+      console.error('Error deleting old categories:', deleteError);
+      throw deleteError;
+    }
+    // Insert new categories
+    if (Array.isArray(categories) && categories.length > 0) {
+      const insertData = categories.map(category_name => ({
+        restaurant_id: restaurantId,
+        category_name
+      }));
+      const { error: insertError } = await supabase
+        .from('Restaurant_Categories')
+        .insert(insertData);
+      if (insertError) {
+        console.error('Error inserting new categories:', insertError);
+        throw insertError;
+      }
+    }
+    return true;
+  }
 }
 
 module.exports = RestaurantCategoryService;
